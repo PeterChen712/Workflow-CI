@@ -1,0 +1,8 @@
+Docker Hub Repository:
+https://hub.docker.com/r/peterchen712/iris-classification-mlflow
+
+Untuk pull image:
+docker pull peterchen712/iris-classification-mlflow:latest
+
+Untuk menjalankan:
+docker run -p 5000:5000 peterchen712/iris-classification-mlflow:latest

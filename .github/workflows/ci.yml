@@ -1,0 +1,149 @@
+name: ML Training CI Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      n_estimators:
+        description: 'Number of estimators'
+        required: false
+        default: '100'
+      max_depth:
+        description: 'Max depth'
+        required: false
+        default: '5'
+
+env:
+  DOCKER_IMAGE: peterchen712/iris-classification-mlflow
+
+jobs:
+  # Job 1: Training
+  train:
+    runs-on: ubuntu-latest
+    outputs:
+      run_id: ${{ steps.train.outputs.run_id }}
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pandas numpy scikit-learn mlflow joblib
+        
+    - name: Run MLflow Training
+      id: train
+      working-directory: MLProject
+      run: |
+        python modelling.py \
+          --n_estimators ${{ github.event.inputs.n_estimators || '100' }} \
+          --max_depth ${{ github.event.inputs.max_depth || '5' }}
+        echo "run_id=$(cat mlruns/0/*/meta.yaml | grep run_id | head -1 | cut -d' ' -f2)" >> $GITHUB_OUTPUT
+        
+    - name: List artifacts
+      run: |
+        echo "=== Training Artifacts ==="
+        ls -la MLProject/model_artifacts/ || echo "No artifacts found"
+        
+    - name: Upload model artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: model-artifacts
+        path: |
+          MLProject/model_artifacts/
+          MLProject/mlruns/
+        retention-days: 30
+
+  # Job 2: Upload to GitHub (Skilled requirement)
+  upload-artifacts:
+    runs-on: ubuntu-latest
+    needs: train
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: model-artifacts
+        path: downloaded-artifacts
+        
+    - name: Commit artifacts to repository
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        mkdir -p saved_models
+        cp -r downloaded-artifacts/* saved_models/ || true
+        
+        git add saved_models/ || true
+        git diff --staged --quiet || git commit -m "Update model artifacts from CI [skip ci]"
+        git push || echo "No changes to push"
+
+  # Job 3: Build Docker Image (Advanced requirement)
+  build-docker:
+    runs-on: ubuntu-latest
+    needs: train
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: model-artifacts
+        path: MLProject/model_artifacts
+        
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        
+    - name: Create Dockerfile
+      run: |
+        cat > Dockerfile << 'EOF'
+        FROM python:3.12-slim
+        
+        WORKDIR /app
+        
+        COPY MLProject/conda.yaml .
+        COPY MLProject/modelling.py .
+        COPY MLProject/model_artifacts/ ./model_artifacts/
+        
+        RUN pip install --no-cache-dir \
+            pandas numpy scikit-learn mlflow joblib
+        
+        EXPOSE 5000
+        
+        CMD ["mlflow", "models", "serve", "-m", "model_artifacts/model", "-p", "5000", "--no-conda"]
+        EOF
+        
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: |
+          ${{ env.DOCKER_IMAGE }}:latest
+          ${{ env.DOCKER_IMAGE }}:${{ github.sha }}
+        
+    - name: Output image info
+      run: |
+        echo "✅ Docker image pushed successfully!"
+        echo "Image: ${{ env.DOCKER_IMAGE }}:latest"
+        echo "Tag: ${{ env.DOCKER_IMAGE }}:${{ github.sha }}"
