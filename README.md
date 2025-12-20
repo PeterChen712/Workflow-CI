@@ -1,26 +1,26 @@
-# MLflow CI/CD Pipeline
+# Pipeline CI/CD MLflow
 
 Rudy Peter Agung Chendra (M208D5Y1771)
 
-Automated training pipeline for machine learning models using MLflow and GitHub Actions.
+Pipeline otomatis untuk training dan deployment model machine learning menggunakan MLflow dan GitHub Actions.
 
-## Overview
+## Deskripsi
 
-This repository contains the CI/CD infrastructure for automated model training and deployment. The pipeline handles model training, artifact management, and optional Docker image publishing.
+Repository ini berisi infrastruktur CI/CD untuk automated model training dan deployment. Pipeline menangani training model, manajemen artifact, dan publishing Docker image.
 
-## Structure
+## Struktur
 
 ```
 MLProject/
-├── MLProject              # MLflow project configuration
-├── conda.yaml            # Conda environment specification
-├── modelling.py          # Training script
-└── iris_preprocessing/   # Preprocessed data
+├── MLProject              # Konfigurasi MLflow project
+├── conda.yaml            # Spesifikasi environment conda
+├── modelling.py          # Script training
+└── iris_preprocessing/   # Data yang sudah diproses
 ```
 
-## Usage
+## Penggunaan
 
-### Local Training
+### Training Lokal
 
 ```bash
 cd MLProject
@@ -35,31 +35,31 @@ mlflow run . -P n_estimators=100 -P max_depth=5
 
 ### GitHub Actions
 
-The workflow triggers automatically on push to main branch. Manual triggers are also supported through workflow_dispatch.
+Workflow trigger otomatis saat push ke main branch. Manual trigger juga tersedia melalui workflow_dispatch.
 
-Parameters:
-- n_estimators: Number of trees in the random forest (default: 100)
-- max_depth: Maximum depth of trees (default: 5)
+Parameter:
+- n_estimators: Jumlah pohon di random forest (default: 100)
+- max_depth: Kedalaman maksimum pohon (default: 5)
 
-## CI Pipeline
+## Pipeline CI
 
-The pipeline consists of three main jobs:
+Pipeline terdiri dari tiga job utama:
 
-1. Training - Runs the ML model training script
-2. Artifact Upload - Saves model artifacts to repository
-3. Docker Build - Creates and pushes Docker image (requires secrets)
+1. Training - Menjalankan script training model
+2. Artifact Upload - Menyimpan model artifacts ke repository
+3. Docker Build - Membuat dan push Docker image (memerlukan secrets)
 
 ## Requirements
 
 - Python 3.12
 - Dependencies: pandas, numpy, scikit-learn, mlflow, joblib
 
-## Configuration
+## Konfigurasi
 
-For Docker Hub publishing, configure repository secrets:
+Untuk publishing Docker Hub, konfigurasi repository secrets:
 - DOCKER_USERNAME
 - DOCKER_PASSWORD
 
-## Related Repository
+## Repository Terkait
 
-Main experimentation: https://github.com/PeterChen712/Eksperimen_SML_Rudy-Peter-Agung-Chendra
+Eksperimen utama: https://github.com/PeterChen712/Eksperimen_SML_Rudy-Peter-Agung-Chendra
