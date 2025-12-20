@@ -1,11 +1,3 @@
-"""
-MLflow Project - Modelling Script
-Nama: Rudy Peter Agung Chendra
-ID Dicoding: M208D5Y1771
-
-Script untuk training model dalam MLflow Project environment.
-"""
-
 import pandas as pd
 import numpy as np
 import mlflow
@@ -25,10 +17,6 @@ from datetime import datetime
 
 
 def prepare_data():
-    """Prepare Iris dataset."""
-    print("Preparing data...")
-    
-    # Load or create preprocessed data
     train_path = "iris_preprocessing/iris_train_preprocessed.csv"
     test_path = "iris_preprocessing/iris_test_preprocessed.csv"
     
@@ -40,7 +28,6 @@ def prepare_data():
         X_test = test_df.drop('target', axis=1)
         y_test = test_df['target']
     else:
-        print("Creating data from scratch...")
         os.makedirs("iris_preprocessing", exist_ok=True)
         
         iris = load_iris()
@@ -59,7 +46,6 @@ def prepare_data():
             scaler.transform(X_test), columns=iris.feature_names
         )
         
-        # Save for later use
         train_df = X_train.copy()
         train_df['target'] = y_train.values
         test_df = X_test.copy()
@@ -73,24 +59,14 @@ def prepare_data():
 
 
 def train_model(n_estimators=100, max_depth=5, min_samples_split=2):
-    """Train Random Forest model with specified parameters."""
-    
-    # Prepare data
     X_train, X_test, y_train, y_test = prepare_data()
     
-    print(f"\nTraining with parameters:")
-    print(f"  - n_estimators: {n_estimators}")
-    print(f"  - max_depth: {max_depth}")
-    print(f"  - min_samples_split: {min_samples_split}")
-    
     with mlflow.start_run():
-        # Log parameters
         mlflow.log_param("n_estimators", n_estimators)
         mlflow.log_param("max_depth", max_depth)
         mlflow.log_param("min_samples_split", min_samples_split)
         mlflow.log_param("model_type", "RandomForestClassifier")
         
-        # Create and train model
         model = RandomForestClassifier(
             n_estimators=n_estimators,
             max_depth=max_depth,
@@ -100,32 +76,25 @@ def train_model(n_estimators=100, max_depth=5, min_samples_split=2):
         )
         
         model.fit(X_train, y_train)
-        
-        # Predictions
         y_pred = model.predict(X_test)
         
-        # Calculate metrics
         accuracy = accuracy_score(y_test, y_pred)
         f1 = f1_score(y_test, y_pred, average='macro')
         precision = precision_score(y_test, y_pred, average='macro')
         recall = recall_score(y_test, y_pred, average='macro')
         
-        # Log metrics
         mlflow.log_metric("accuracy", accuracy)
         mlflow.log_metric("f1_score", f1)
         mlflow.log_metric("precision", precision)
         mlflow.log_metric("recall", recall)
         
-        # Log model
         mlflow.sklearn.log_model(model, "model")
         
-        # Save model locally too
         os.makedirs("model_artifacts", exist_ok=True)
         model_path = "model_artifacts/model.pkl"
         joblib.dump(model, model_path)
         mlflow.log_artifact(model_path)
         
-        # Save metrics
         metrics = {
             "accuracy": accuracy,
             "f1_score": f1,
@@ -138,14 +107,8 @@ def train_model(n_estimators=100, max_depth=5, min_samples_split=2):
             json.dump(metrics, f, indent=2)
         mlflow.log_artifact(metrics_path)
         
-        # Log tags
         mlflow.set_tag("author", "Rudy Peter Agung Chendra")
         mlflow.set_tag("project", "iris-classification")
-        
-        print(f"\n✓ Training completed!")
-        print(f"  - Accuracy: {accuracy:.4f}")
-        print(f"  - F1 Score: {f1:.4f}")
-        print(f"  - Run ID: {mlflow.active_run().info.run_id}")
         
         return model, metrics
 
@@ -158,18 +121,11 @@ def main():
     
     args = parser.parse_args()
     
-    print("\n" + "="*60)
-    print("  MLflow Project - Iris Classification")
-    print("  Rudy Peter Agung Chendra")
-    print("="*60)
-    
     model, metrics = train_model(
         n_estimators=args.n_estimators,
         max_depth=args.max_depth,
         min_samples_split=args.min_samples_split
     )
-    
-    print("\n✅ Training complete! Model saved to model_artifacts/")
 
 
 if __name__ == "__main__":
