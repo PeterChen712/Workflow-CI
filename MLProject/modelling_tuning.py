@@ -138,7 +138,14 @@ def train_with_manual_logging(X_train, X_test, y_train, y_test):
         for metric_name, metric_value in metrics.items():
             mlflow.log_metric(metric_name, metric_value)
         
-        mlflow.sklearn.log_model(best_model, "model", registered_model_name="iris-random-forest")
+        from mlflow.models.signature import infer_signature
+        signature = infer_signature(X_train, best_model.predict(X_train))
+        mlflow.sklearn.log_model(
+            best_model,
+            "model",
+            signature=signature,
+            input_example=X_train.iloc[:5]
+        )
         
         cm_path = create_confusion_matrix_plot(
             y_test, y_pred, 
