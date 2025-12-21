@@ -63,14 +63,20 @@ def train_model(n_estimators=100, max_depth=5, min_samples_split=2):
     
     dagshub_token = os.getenv('DAGSHUB_TOKEN')
     if dagshub_token:
-        import dagshub
-        dagshub.init(
-            repo_owner='PeterChen712',
-            repo_name='Eksperimen_SML_Rudy-Peter-Agung-Chendra',
-            mlflow=True
-        )
+        try:
+            import dagshub
+            dagshub.init(
+                repo_owner='PeterChen712',
+                repo_name='Eksperimen_SML_Rudy-Peter-Agung-Chendra',
+                mlflow=True
+            )
+            print("Using DagsHub remote tracking")
+        except Exception as e:
+            print(f"DagsHub init failed: {e}, using in-memory tracking")
+            mlflow.set_tracking_uri("file:///tmp/mlruns")
     else:
-        mlflow.set_tracking_uri("http://127.0.0.1:5000")
+        print("No DagsHub token, using in-memory tracking")
+        mlflow.set_tracking_uri("file:///tmp/mlruns")
     
     mlflow.set_experiment("iris-classification")
     
