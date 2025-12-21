@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import mlflow
 import mlflow.sklearn
+import dagshub
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
@@ -60,6 +61,18 @@ def prepare_data():
 
 def train_model(n_estimators=100, max_depth=5, min_samples_split=2):
     X_train, X_test, y_train, y_test = prepare_data()
+    
+    dagshub_token = os.getenv('DAGSHUB_TOKEN')
+    if dagshub_token:
+        dagshub.init(
+            repo_owner='PeterChen712',
+            repo_name='Eksperimen_SML_Rudy-Peter-Agung-Chendra',
+            mlflow=True
+        )
+    else:
+        mlflow.set_tracking_uri("http://127.0.0.1:5000")
+    
+    mlflow.set_experiment("iris-classification")
     
     with mlflow.start_run():
         mlflow.log_param("n_estimators", n_estimators)
