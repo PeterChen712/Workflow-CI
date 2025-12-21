@@ -93,6 +93,8 @@ def train_model(n_estimators=100, max_depth=5, min_samples_split=2):
         
         accuracy = accuracy_score(y_test, y_pred)
         
+        mlflow.sklearn.log_model(model, "model")
+        
         return model, {"accuracy": accuracy}
 
 
