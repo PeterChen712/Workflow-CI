@@ -11,7 +11,8 @@ RUN pip install --no-cache-dir \
     numpy==1.26.4 \
     scikit-learn==1.5.0 \
     mlflow==2.19.0 \
-    joblib==1.4.2
+    joblib==1.4.2 \
+    dagshub==0.3.0
 
 # Copy application code
 COPY MLProject/modelling.py .
