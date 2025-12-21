@@ -80,11 +80,6 @@ def train_model(n_estimators=100, max_depth=5, min_samples_split=2):
     mlflow.sklearn.autolog()
     
     with mlflow.start_run():
-        mlflow.log_param("n_estimators", n_estimators)
-        mlflow.log_param("max_depth", max_depth)
-        mlflow.log_param("min_samples_split", min_samples_split)
-        mlflow.log_param("model_type", "RandomForestClassifier")
-        
         model = RandomForestClassifier(
             n_estimators=n_estimators,
             max_depth=max_depth,
@@ -97,38 +92,8 @@ def train_model(n_estimators=100, max_depth=5, min_samples_split=2):
         y_pred = model.predict(X_test)
         
         accuracy = accuracy_score(y_test, y_pred)
-        f1 = f1_score(y_test, y_pred, average='macro')
-        precision = precision_score(y_test, y_pred, average='macro')
-        recall = recall_score(y_test, y_pred, average='macro')
         
-        mlflow.log_metric("accuracy", accuracy)
-        mlflow.log_metric("f1_score", f1)
-        mlflow.log_metric("precision", precision)
-        mlflow.log_metric("recall", recall)
-        
-        mlflow.sklearn.log_model(model, "model")
-        
-        os.makedirs("model_artifacts", exist_ok=True)
-        model_path = "model_artifacts/model.pkl"
-        joblib.dump(model, model_path)
-        mlflow.log_artifact(model_path)
-        
-        metrics = {
-            "accuracy": accuracy,
-            "f1_score": f1,
-            "precision": precision,
-            "recall": recall,
-            "timestamp": datetime.now().isoformat()
-        }
-        metrics_path = "model_artifacts/metrics.json"
-        with open(metrics_path, 'w') as f:
-            json.dump(metrics, f, indent=2)
-        mlflow.log_artifact(metrics_path)
-        
-        mlflow.set_tag("author", "Rudy Peter Agung Chendra")
-        mlflow.set_tag("project", "iris-classification")
-        
-        return model, metrics
+        return model, {"accuracy": accuracy}
 
 
 def main():
