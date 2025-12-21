@@ -78,9 +78,10 @@ def train_model(n_estimators=100, max_depth=5, min_samples_split=2):
             mlflow.set_tracking_uri("http://127.0.0.1:5000")
     
     mlflow.set_experiment("iris-classification")
-    mlflow.sklearn.autolog(log_models=True, log_input_examples=True, log_model_signatures=True)
     
     with mlflow.start_run():
+        mlflow.sklearn.autolog(log_models=True, log_input_examples=True, log_model_signatures=True)
+        
         model = RandomForestClassifier(
             n_estimators=n_estimators,
             max_depth=max_depth,
@@ -93,16 +94,6 @@ def train_model(n_estimators=100, max_depth=5, min_samples_split=2):
         y_pred = model.predict(X_test)
         
         accuracy = accuracy_score(y_test, y_pred)
-        signature = infer_signature(X_train, model.predict(X_train))
-        input_example = X_train.head(5)
-
-        mlflow.sklearn.log_model(
-            sk_model=model,
-            artifact_path="model",
-            signature=signature,
-            input_example=input_example,
-        )
-        mlflow.log_metric("accuracy", accuracy)
         
         return model, {"accuracy": accuracy}
 
