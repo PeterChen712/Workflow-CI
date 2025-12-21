@@ -62,14 +62,23 @@ def create_feature_importance_plot(model, feature_names, save_path):
 
 
 def train_with_manual_logging(X_train, X_test, y_train, y_test):
-    dagshub_token = os.getenv('DAGSHUB_TOKEN')
-    if dagshub_token:
-        import dagshub
-        dagshub.init(repo_owner='PeterChen712', 
-                     repo_name='Eksperimen_SML_Rudy-Peter-Agung-Chendra', 
-                     mlflow=True)
+    # Prefer explicit tracking URI (e.g., DagsHub) if provided by environment
+    mlflow_uri = os.getenv('MLFLOW_TRACKING_URI')
+    if mlflow_uri:
+        mlflow.set_tracking_uri(mlflow_uri)
     else:
-        mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
+        # Fallback to Dagshub token if available (supports both env names)
+        dagshub_token = os.getenv('DAGSHUB_TOKEN') or os.getenv('DAGSHUB_USER_TOKEN')
+        if dagshub_token:
+            import dagshub
+            dagshub.init(
+                repo_owner='PeterChen712',
+                repo_name='Eksperimen_SML_Rudy-Peter-Agung-Chendra',
+                mlflow=True
+            )
+        else:
+            # Last resort: local MLflow on 127.0.0.1:5000
+            mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
     
     mlflow.set_experiment(EXPERIMENT_NAME)
     
