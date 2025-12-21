@@ -48,7 +48,7 @@ jobs:
         MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
         MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
       run: |
-        python modelling_tuning.py \
+        python modelling.py \
           --n_estimators ${{ github.event.inputs.n_estimators || '100' }} \
           --max_depth ${{ github.event.inputs.max_depth || '5' }}
         echo "run_id=$(cat mlruns/0/*/meta.yaml | grep run_id | head -1 | cut -d' ' -f2)" >> $GITHUB_OUTPUT
