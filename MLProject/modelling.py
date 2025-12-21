@@ -61,16 +61,20 @@ def prepare_data():
 def train_model(n_estimators=100, max_depth=5, min_samples_split=2):
     X_train, X_test, y_train, y_test = prepare_data()
     
-    dagshub_token = os.getenv('DAGSHUB_TOKEN')
-    if dagshub_token:
-        import dagshub
-        dagshub.init(
-            repo_owner='PeterChen712',
-            repo_name='Eksperimen_SML_Rudy-Peter-Agung-Chendra',
-            mlflow=True
-        )
+    mlflow_uri = os.getenv('MLFLOW_TRACKING_URI')
+    if mlflow_uri:
+        mlflow.set_tracking_uri(mlflow_uri)
     else:
-        mlflow.set_tracking_uri("http://127.0.0.1:5000")
+        dagshub_token = os.getenv('DAGSHUB_TOKEN') or os.getenv('DAGSHUB_USER_TOKEN')
+        if dagshub_token:
+            import dagshub
+            dagshub.init(
+                repo_owner='PeterChen712',
+                repo_name='Eksperimen_SML_Rudy-Peter-Agung-Chendra',
+                mlflow=True
+            )
+        else:
+            mlflow.set_tracking_uri("http://127.0.0.1:5000")
     
     mlflow.set_experiment("iris-classification")
     

@@ -43,7 +43,8 @@ jobs:
       id: train
       working-directory: MLProject
       env:
-        DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+        DAGSHUB_USER_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+        MLFLOW_TRACKING_URI: https://dagshub.com/PeterChen712/Eksperimen_SML_Rudy-Peter-Agung-Chendra.mlflow
         MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
         MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
       run: |
