@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import mlflow
 import mlflow.sklearn
+from mlflow.models import infer_signature
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
@@ -92,8 +93,16 @@ def train_model(n_estimators=100, max_depth=5, min_samples_split=2):
         y_pred = model.predict(X_test)
         
         accuracy = accuracy_score(y_test, y_pred)
-        
-        mlflow.sklearn.log_model(model, "model")
+        signature = infer_signature(X_train, model.predict(X_train))
+        input_example = X_train.head(5)
+
+        mlflow.sklearn.log_model(
+            sk_model=model,
+            artifact_path="model",
+            signature=signature,
+            input_example=input_example,
+        )
+        mlflow.log_metric("accuracy", accuracy)
         
         return model, {"accuracy": accuracy}
 
