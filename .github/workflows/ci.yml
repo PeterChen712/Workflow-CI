@@ -37,7 +37,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pandas numpy scikit-learn mlflow joblib dagshub
+        pip install pandas numpy scikit-learn mlflow joblib dagshub seaborn matplotlib
         
     - name: Run MLflow Training
       id: train
