@@ -67,7 +67,6 @@ jobs:
   upload-artifacts:
     runs-on: ubuntu-latest
     needs: train
-    if: false  # Temporarily disabled
     
     steps:
     - name: Checkout repository
@@ -95,7 +94,6 @@ jobs:
   build-docker:
     runs-on: ubuntu-latest
     needs: train
-    if: false  # Temporarily disabled - requires Docker secrets
     
     steps:
     - name: Checkout repository
