@@ -77,7 +77,7 @@ def train_model(n_estimators=100, max_depth=5, min_samples_split=2):
             mlflow.set_tracking_uri("http://127.0.0.1:5000")
     
     mlflow.set_experiment("iris-classification")
-    mlflow.sklearn.autolog()
+    mlflow.sklearn.autolog(log_models=True, log_input_examples=True, log_model_signatures=True)
     
     with mlflow.start_run():
         model = RandomForestClassifier(
