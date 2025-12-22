@@ -80,8 +80,6 @@ def train_model(n_estimators=100, max_depth=5, min_samples_split=2):
     mlflow.set_experiment("iris-classification")
     
     with mlflow.start_run():
-        mlflow.sklearn.autolog(log_models=True, log_input_examples=True, log_model_signatures=True)
-        
         model = RandomForestClassifier(
             n_estimators=n_estimators,
             max_depth=max_depth,
@@ -94,8 +92,32 @@ def train_model(n_estimators=100, max_depth=5, min_samples_split=2):
         y_pred = model.predict(X_test)
         
         accuracy = accuracy_score(y_test, y_pred)
+        f1 = f1_score(y_test, y_pred, average='weighted')
+        precision = precision_score(y_test, y_pred, average='weighted')
+        recall = recall_score(y_test, y_pred, average='weighted')
         
-        return model, {"accuracy": accuracy}
+        mlflow.log_param("n_estimators", n_estimators)
+        mlflow.log_param("max_depth", max_depth)
+        mlflow.log_param("min_samples_split", min_samples_split)
+        mlflow.log_param("random_state", 42)
+        
+        mlflow.log_metric("accuracy", accuracy)
+        mlflow.log_metric("f1_score", f1)
+        mlflow.log_metric("precision", precision)
+        mlflow.log_metric("recall", recall)
+        
+        input_example = X_train.iloc[:5]
+        signature = infer_signature(X_train, model.predict(X_train))
+        
+        mlflow.sklearn.log_model(
+            sk_model=model,
+            artifact_path="model",
+            signature=signature,
+            input_example=input_example,
+            registered_model_name="iris-classifier"
+        )
+        
+        return model, {"accuracy": accuracy, "f1_score": f1}
 
 
 def main():
