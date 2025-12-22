@@ -41,55 +41,44 @@ def train_model(n_estimators=100, max_depth=5, min_samples_split=2):
         else:
             mlflow.set_tracking_uri("http://127.0.0.1:5000")
     
-    active_run = mlflow.active_run()
-    if active_run is None:
-        mlflow.set_experiment("heart-disease-classification")
-        run_context = mlflow.start_run()
-    else:
-        run_context = None
+    model = RandomForestClassifier(
+        n_estimators=n_estimators,
+        max_depth=max_depth,
+        min_samples_split=min_samples_split,
+        random_state=42,
+        n_jobs=-1
+    )
     
-    try:
-        model = RandomForestClassifier(
-            n_estimators=n_estimators,
-            max_depth=max_depth,
-            min_samples_split=min_samples_split,
-            random_state=42,
-            n_jobs=-1
-        )
-        
-        model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
-        
-        accuracy = accuracy_score(y_test, y_pred)
-        f1 = f1_score(y_test, y_pred, average='binary')
-        precision = precision_score(y_test, y_pred, average='binary')
-        recall = recall_score(y_test, y_pred, average='binary')
-        
-        mlflow.log_param("n_estimators", n_estimators)
-        mlflow.log_param("max_depth", max_depth)
-        mlflow.log_param("min_samples_split", min_samples_split)
-        mlflow.log_param("random_state", 42)
-        
-        mlflow.log_metric("accuracy", accuracy)
-        mlflow.log_metric("f1_score", f1)
-        mlflow.log_metric("precision", precision)
-        mlflow.log_metric("recall", recall)
-        
-        input_example = X_train.iloc[:5]
-        signature = infer_signature(X_train, model.predict(X_train))
-        
-        mlflow.sklearn.log_model(
-            sk_model=model,
-            artifact_path="model",
-            signature=signature,
-            input_example=input_example,
-            registered_model_name="heart-disease-classifier"
-        )
-        
-        return model, {"accuracy": accuracy, "f1_score": f1}
-    finally:
-        if run_context is not None:
-            mlflow.end_run()
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    
+    accuracy = accuracy_score(y_test, y_pred)
+    f1 = f1_score(y_test, y_pred, average='binary')
+    precision = precision_score(y_test, y_pred, average='binary')
+    recall = recall_score(y_test, y_pred, average='binary')
+    
+    mlflow.log_param("n_estimators", n_estimators)
+    mlflow.log_param("max_depth", max_depth)
+    mlflow.log_param("min_samples_split", min_samples_split)
+    mlflow.log_param("random_state", 42)
+    
+    mlflow.log_metric("accuracy", accuracy)
+    mlflow.log_metric("f1_score", f1)
+    mlflow.log_metric("precision", precision)
+    mlflow.log_metric("recall", recall)
+    
+    input_example = X_train.iloc[:5]
+    signature = infer_signature(X_train, model.predict(X_train))
+    
+    mlflow.sklearn.log_model(
+        sk_model=model,
+        artifact_path="model",
+        signature=signature,
+        input_example=input_example,
+        registered_model_name="heart-disease-classifier"
+    )
+    
+    return model, {"accuracy": accuracy, "f1_score": f1}
 
 def main():
     parser = argparse.ArgumentParser()
