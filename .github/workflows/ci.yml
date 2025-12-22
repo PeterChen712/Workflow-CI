@@ -17,7 +17,7 @@ on:
         default: '5'
 
 env:
-  DOCKER_IMAGE: peterchen712/iris-classification-mlflow
+  DOCKER_IMAGE: peterchen712/heart-disease-mlflow
 
 jobs:
   train:
