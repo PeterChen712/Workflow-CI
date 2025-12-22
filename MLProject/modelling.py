@@ -41,9 +41,14 @@ def train_model(n_estimators=100, max_depth=5, min_samples_split=2):
         else:
             mlflow.set_tracking_uri("http://127.0.0.1:5000")
     
-    mlflow.set_experiment("heart-disease-classification")
+    active_run = mlflow.active_run()
+    if active_run is None:
+        mlflow.set_experiment("heart-disease-classification")
+        run_context = mlflow.start_run()
+    else:
+        run_context = None
     
-    with mlflow.start_run():
+    try:
         model = RandomForestClassifier(
             n_estimators=n_estimators,
             max_depth=max_depth,
@@ -82,6 +87,9 @@ def train_model(n_estimators=100, max_depth=5, min_samples_split=2):
         )
         
         return model, {"accuracy": accuracy, "f1_score": f1}
+    finally:
+        if run_context is not None:
+            mlflow.end_run()
 
 def main():
     parser = argparse.ArgumentParser()

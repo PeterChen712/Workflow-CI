@@ -1,4 +1,4 @@
-name: iris-classification
+name: heart-disease-classification
 
 conda_env: conda.yaml
 
