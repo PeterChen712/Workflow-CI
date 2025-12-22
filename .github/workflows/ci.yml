@@ -46,6 +46,7 @@ jobs:
         MLFLOW_TRACKING_URI: https://dagshub.com/PeterChen712/Eksperimen_SML_Rudy-Peter-Agung-Chendra.mlflow
         MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
         MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
+        MLFLOW_TRACKING_INSECURE_TLS: true
       run: |
         mlflow run MLProject \
           -P n_estimators=${{ github.event.inputs.n_estimators || '100' }} \

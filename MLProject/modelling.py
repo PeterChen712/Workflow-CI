@@ -16,6 +16,8 @@ import sys
 import argparse
 from datetime import datetime
 
+os.environ['MLFLOW_TRACKING_INSECURE_TLS'] = 'true'
+
 
 def prepare_data():
     train_path = "iris_preprocessing/iris_train_preprocessed.csv"
