@@ -47,8 +47,9 @@ jobs:
         MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
         MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
         MLFLOW_TRACKING_INSECURE_TLS: true
+        PYTHONWARNINGS: ignore
       run: |
-        mlflow run MLProject \
+        mlflow run MLProject --no-conda \
           -P n_estimators=${{ github.event.inputs.n_estimators || '100' }} \
           -P max_depth=${{ github.event.inputs.max_depth || '5' }} \
           -P min_samples_split=2
